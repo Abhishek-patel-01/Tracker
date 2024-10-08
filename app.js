@@ -12,6 +12,17 @@ const io = socketio(server);
 app.set("view engine", "ejs");
 app.use(express.static(path.join("public")));
 
+app.use(
+  "/css",
+  express.static("public/css", {
+    setHeaders: (res, path) => {
+      if (path.endsWith(".css")) {
+        res.setHeader("Content-Type", "text/css");
+      }
+    },
+  })
+);
+
 io.on("connection", function (socket) {
   socket.on("send-location", function (data) {
     io.emit("receive-location", { id: socket.id, ...data });
