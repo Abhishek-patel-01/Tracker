@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const http = require("http");
@@ -11,7 +12,7 @@ const io = socketio(server);
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
-const trackedUsers = {}; // Store location by unique identifier
+const trackedUsers = {};
 
 app.get("/track/:identifier", function (req, res) {
   res.render("index", { identifier: req.params.identifier });
@@ -40,8 +41,7 @@ io.on("connection", function (socket) {
 
     if (start && end) {
       try {
-        const orsApiKey =
-          "5b3ce3597851110001cf62483e92f555d7f946399d5fa43372c5ad47"; // Replace with your actual API key
+        const orsApiKey = process.env.ORS_API_KEY;
         const response = await axios.get(
           `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${orsApiKey}&start=${start.longitude},${start.latitude}&end=${end.longitude},${end.latitude}`
         );

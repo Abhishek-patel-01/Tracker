@@ -1,21 +1,17 @@
 {
-  "name": "tracker",
+  "name": "live-location-tracker",
   "version": "1.0.0",
-  "description": "",
+  "description": "Live location tracking application",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "axios": "^1.8.3",
-    "ejs": "^3.1.10",
-    "express": "^4.21.0",
-    "socket.io": "^4.8.0"
-  },
-  "devDependencies": {
-    "@types/tape": "^5.8.1"
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "leaflet": "^1.9.4",
+    "socket.io": "^4.7.5"
   }
 }
