@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Your Location & Link Generation</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Location Tracking</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
@@ -16,7 +18,7 @@
       <input
         type="text"
         id="momIdentifier"
-        placeholder="Enter Mom's Identifier"
+        placeholder="Enter unique Identifier"
       />
       <button id="generateLink">Generate Link</button>
       <p id="linkDisplay"></p>
@@ -78,7 +80,7 @@
             "linkDisplay"
           ).textContent = `Share this link: ${link}`;
         } else {
-          alert("Please enter Mom's Identifier");
+          alert("Please enter unique Identifier");
         }
       });
 

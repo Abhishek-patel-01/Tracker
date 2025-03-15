@@ -1,15 +1,20 @@
-/* Base styles for larger screens */
-body {
-  font-family: Arial, sans-serif;
+html, body {
+  height: 100vh;
   margin: 0;
   padding: 0;
 }
 
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
 #map {
-  height: 500px; /* Default height for the map */
   width: 100%;
   margin-top: 20px;
   background-color: #f0f0f0;
+  flex-grow: 1;
 }
 
 .input-container {
@@ -17,13 +22,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0 20px; /* Add some padding for better spacing */
+  padding: 20px 20px;
 }
 
 input#momIdentifier {
   margin-bottom: 10px;
-  width: 250px; /* Default width for larger screens */
+  width: 250px;
   padding: 8px;
+  box-sizing: border-box;
 }
 
 #linkDisplay {
@@ -38,48 +44,42 @@ button#generateLink {
   border: none;
   cursor: pointer;
   border-radius: 5px;
+  box-sizing: border-box;
 }
 
-/* Media Queries for Small Screens */
 @media (max-width: 768px) {
   #map {
-    height: 300px; /* Reduce map height on smaller screens */
+      margin-top: 0;
+      height: calc(100vh - 200px); /* Adjust map height based on input container height */
   }
 
   .input-container {
-    align-items: center; /* Center align input container */
-    width: 100%; /* Full width for input container */
-    padding: 0 10px; /* Reduce padding for smaller screens */
+      align-items: center;
+      width: 100%;
+      padding: 20px 10px;
+      height: 180px; /* Set a fixed height for the input container */
   }
 
   input#momIdentifier {
-    width: 90%; /* Full width on smaller screens */
-    margin-bottom: 10px; /* Maintain margin */
+      width: calc(100% - 20px);
+      margin-bottom: 10px;
   }
 
   button#generateLink {
-    width: 90%; /* Full width button */
+      width: calc(100% - 20px);
   }
 
   #linkDisplay {
-    text-align: center; /* Center align link display */
+      text-align: center;
   }
 }
 
 @media (max-width: 480px) {
-  #map {
-    height: 250px; /* Further reduce map height on very small screens */
-  }
-
   input#momIdentifier {
-    padding: 10px; /* Increase padding for better touch targets */
+      padding: 12px;
   }
 
   button#generateLink {
-    padding: 12px; /* Increase padding for better touch targets */
-  }
-
-  .input-container {
-    margin-top: 10px; /* Reduce margin for smaller screens */
+      padding: 14px;
   }
 }
