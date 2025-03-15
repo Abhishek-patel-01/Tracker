@@ -2,9 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const userIdentifier = window.location.pathname.split("/").pop();
   const socket = io({ query: { userIdentifier } });
 
-  const map = L.map("map").setView([0, 0], 2);
+  const map = L.map("map").setView([21.1702, 72.8311], 13); // Default Surat location
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "Map data &copy; OpenStreetMap",
+    attribution: "Map data &copy; OpenStreetMap contributors",
   }).addTo(map);
 
   const markers = {};
@@ -14,14 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (position) => {
-          socket.emit("send-location", {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
+          const { latitude, longitude } = position.coords;
+          socket.emit("send-location", { latitude, longitude });
         },
         (error) => {
           console.error("Geolocation error:", error);
-          alert("Could not get your location.");
+          alert("Location access denied or unavailable.");
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
       );
@@ -41,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
         data.longitude,
       ]).addTo(map);
     }
-    map.setView([data.latitude, data.longitude], 16);
+    map.setView([data.latitude, data.longitude], 14);
   });
 
   document.getElementById("calculate-route").addEventListener("click", () => {
@@ -57,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   socket.on("route-drawn", (data) => {
     if (routePolyline) map.removeLayer(routePolyline);
-    routePolyline = L.polyline(data.routeCoordinates, {
-      color: "blue",
-    }).addTo(map);
+    routePolyline = L.polyline(data.routeCoordinates, { color: "blue" }).addTo(
+      map
+    );
     map.fitBounds(routePolyline.getBounds());
   });
 

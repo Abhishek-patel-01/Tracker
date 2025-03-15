@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Location Tracking</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      const userIdentifier = window.location.pathname.split("/").pop();
+      const socket = io({ query: { userIdentifier } });
+
+      const map = L.map("map").setView([21.1702, 72.8311], 13); // Default Surat location
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "Map data &copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      const markers = {};
+      let routePolyline = null;
+
+      function fetchLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            (position) => {
+              socket.emit("send-location", {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              });
+            },
+            (error) => {
+              console.error("Geolocation error:", error);
+              alert("Location access denied or unavailable.");
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+          );
+        } else {
+          alert("Geolocation is not supported.");
+        }
+      }
+
+      fetchLocation();
+
+      socket.on("receive-location", (data) => {
+        if (markers[data.userIdentifier]) {
+          markers[data.userIdentifier].setLatLng([
+            data.latitude,
+            data.longitude,
+          ]);
+        } else {
+          markers[data.userIdentifier] = L.marker([
+            data.latitude,
+            data.longitude,
+          ]).addTo(map);
+        }
+        map.setView([data.latitude, data.longitude], 14);
+
+        // Automatically calculate the route if both users are connected
+        if (Object.keys(markers).length === 2) {
+          // Assuming two users are connected
+          const user1Identifier = Object.keys(markers)[0];
+          const user2Identifier = Object.keys(markers)[1];
+          socket.emit("calculate-route", {
+            user1Identifier,
+            user2Identifier,
+          });
+        }
+      });
+
+      socket.on("route-drawn", (data) => {
+        if (routePolyline) map.removeLayer(routePolyline);
+        routePolyline = L.polyline(data.routeCoordinates, {
+          color: "blue",
+        }).addTo(map);
+        map.fitBounds(routePolyline.getBounds());
+      });
+
+      socket.on("route-error", (msg) => alert(msg));
+    </script>
+  </body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Your Location & Link Generation</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+    />
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div class="input-container">
+      <input
+        type="text"
+        id="momIdentifier"
+        placeholder="Enter Mom's Identifier"
+      />
+      <button id="generateLink">Generate Link</button>
+      <p id="linkDisplay"></p>
+    </div>
+
+    <script>
+      const myIdentifier = "tracker123"; // Replace with YOUR identifier!
+      const socket = io({ query: { userIdentifier: myIdentifier } });
+      const map = L.map("map").setView([21.1702, 72.8311], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "Map data &copy; OpenStreetMap contributors",
+      }).addTo(map);
+
+      const markers = {};
+      let routePolyline = null;
+
+      function fetchLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.watchPosition(
+            (position) => {
+              socket.emit("send-location", {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              });
+            },
+            (error) => {
+              console.error("Geolocation error:", error);
+              alert("Location access denied or unavailable.");
+            },
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+      fetchLocation();
+
+      socket.on("receive-location", (data) => {
+        if (markers[data.userIdentifier]) {
+          markers[data.userIdentifier].setLatLng([
+            data.latitude,
+            data.longitude,
+          ]);
+        } else {
+          markers[data.userIdentifier] = L.marker([
+            data.latitude,
+            data.longitude,
+          ]).addTo(map);
+        }
+        map.setView([data.latitude, data.longitude], 16);
+      });
+
+      document.getElementById("generateLink").addEventListener("click", () => {
+        const momIdentifier = document.getElementById("momIdentifier").value;
+        if (momIdentifier) {
+          const baseUrl = window.location.origin;
+          const link = `${baseUrl}/track/${momIdentifier}`;
+          document.getElementById(
+            "linkDisplay"
+          ).textContent = `Share this link: ${link}`;
+        } else {
+          alert("Please enter Mom's Identifier");
+        }
+      });
+
+      // Handle route drawing
+      socket.on("route-drawn", (data) => {
+        if (routePolyline) map.removeLayer(routePolyline);
+        routePolyline = L.polyline(data.routeCoordinates, {
+          color: "blue",
+        }).addTo(map);
+        map.fitBounds(routePolyline.getBounds());
+      });
+
+      socket.on("route-error", (msg) => alert(msg));
+    </script>
+  </body>
+</html>

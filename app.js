@@ -14,16 +14,18 @@ app.use(express.static(path.join(__dirname, "public")));
 
 const trackedUsers = {};
 
-app.get("/track/:identifier", function (req, res) {
-  res.render("index", { identifier: req.params.identifier });
+app.get("/", (req, res) => res.render("default"));
+
+app.get("/track/:identifier", (req, res) => {
+  res.render("track", { identifier: req.params.identifier });
 });
 
-io.on("connection", function (socket) {
+io.on("connection", (socket) => {
   const userIdentifier = socket.handshake.query.userIdentifier;
   socket.userIdentifier = userIdentifier;
   console.log("A user connected:", userIdentifier);
 
-  socket.on("send-location", function (data) {
+  socket.on("send-location", (data) => {
     if (userIdentifier) {
       trackedUsers[userIdentifier] = data;
       io.sockets.emit("receive-location", {
@@ -69,11 +71,11 @@ io.on("connection", function (socket) {
     }
   });
 
-  socket.on("disconnect", function () {
-    delete trackedUsers[userIdentifier];
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.userIdentifier);
+    delete trackedUsers[socket.userIdentifier];
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
